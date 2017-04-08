@@ -11,7 +11,7 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, Flatten
 from keras.layers import Convolution2D, MaxPooling2D
-from keras.utils import np_utils
+import np_utils
 
 computed_metrics = ['accuracy', 'mean_squared_error']
 
@@ -28,16 +28,10 @@ def get_loss(regression):
         return 'categorical_crossentropy'
 
 def get_optimizer(regression, nb_layers, lr_mult=1):
-    '''if regression:
-        return keras.optimizers.RMSprop(lr=0.001 / (1.5 * nb_layers) * lr_mult)
-    else:
-        return keras.optimizers.RMSprop(lr=0.001 * lr_mult)# / (5 * nb_layers))'''
     if regression:
-        return keras.optimizers.SGD(lr=0.01 * lr_mult / 2,
-                                    momentum=0.9, decay=0.00005, nesterov=True)
+        return keras.optimizers.Adam()
     else:
-        return keras.optimizers.SGD(lr=0.01 * lr_mult,
-                                    momentum=0.9, decay=0.00005, nesterov=True)
+        return keras.optimizers.Adam()
 
 
 def generate_conv_net_base(

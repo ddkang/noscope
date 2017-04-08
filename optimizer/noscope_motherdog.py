@@ -52,18 +52,61 @@ LABELS[5] = "bus"
 
 YOLO_LABELS = dict()
 #YOLO_LABELS["aoerc"] = (0, [("", ()), ("", ()), ("", ()), ("", ())])
-YOLO_LABELS["broadway-jackson-hole"] = (2, [("broadway-jackson-hole_mnist_128_64.pb", None), ("broadway-jackson-hole_mnist_128_64.pb", ("broadway-jackson-hole_raw_mse_lr_l2_delay10_resol50_ref-index59_num-blocks10.model", 60)), ("broadway-jackson-hole_mnist_128_16.pb", None), ("broadway-jackson-hole_mnist_128_16.pb", ("broadway-jackson-hole_raw_mse_lr_l2_delay10_resol50_ref-index59_num-blocks10.model", 60))])
-YOLO_LABELS["buffalo-meat"] = (0, [("buffalo-meat_mnist_128_32.pb", None), ("buffalo-meat_mnist_128_32.pb", ("buffalo-meat_raw_mse_lr_l2_delay10_resol100_ref-index59_num-blocks10.model", 60)), ("buffalo-meat_mnist_256_16.pb", None), ("buffalo-meat_mnist_256_16.pb", ("buffalo-meat_raw_mse_lr_l2_delay10_resol100_ref-index59_num-blocks10.model", 60))])
+YOLO_LABELS["broadway-jackson-hole"] = (
+        2,
+        [("broadway-jackson-hole_convnet_64_32_2_1.pb", None),
+         ("broadway-jackson-hole_convnet_64_32_2_1.pb", ("broadway-jackson-hole_raw_mse_lr_l2_delay10_resol50_ref-index59_num-blocks10.model", 60)),
+         ("broadway-jackson-hole_convnet_128_32_2_1.pb", None),
+         ("broadway-jackson-hole_convnet_128_32_2_1.pb", ("broadway-jackson-hole_raw_mse_lr_l2_delay10_resol50_ref-index59_num-blocks10.model", 60))]
+)
+YOLO_LABELS["buffalo-meat"] = (
+        0,
+        [("buffalo-meat_convnet_256_64_1_1.pb", None),
+         #("buffalo-meat_convnet_256_64_1_1.pb", ("buffalo-meat_raw_mse_lr_l2_delay10_resol100_ref-index59_num-blocks10.model", 60)),
+         ("buffalo-meat_convnet_256_64_2_1.pb", None),
+         #("buffalo-meat_convnet_256_64_2_1.pb", ("buffalo-meat_raw_mse_lr_l2_delay10_resol100_ref-index59_num-blocks10.model", 60))
+         ]
+)
 #YOLO_LABELS["bytes"] = (0, [("", ()), ("", ()), ("", ()), ("", ())])
-YOLO_LABELS["buses-cars-archie-europe-rotonde"] = (2, [("buses-cars-archie-europe-rotonde_cifar10_32_2.pb", None), ("buses-cars-archie-europe-rotonde_cifar10_32_2.pb", ("buses-cars-archie-europe-rotonde_raw_mse_lr_l2_delay10_resol50_ref-index369_num-blocks10.model", 360)), ("buses-cars-archie-europe-rotonde_mnist_32_16.pb", None), ("buses-cars-archie-europe-rotonde_mnist_32_16.pb", ("buses-cars-archie-europe-rotonde_raw_mse_lr_l2_delay10_resol50_ref-index369_num-blocks10.model", 360))])
-YOLO_LABELS["coral-reef"] = (0, [("coral-reef_cifar10_256_1.pb", None), ("coral-reef_cifar10_256_1.pb", ("coral-reef_raw_mse_lr_l2_delay10_resol100_ref-index508_num-blocks10.model", 510)), ("coral-reef_mnist_128_16.pb", None), ("coral-reef_mnist_128_16.pb", ("coral-reef_raw_mse_lr_l2_delay10_resol100_ref-index508_num-blocks10.model", 510))])
+YOLO_LABELS["buses-cars-archie-europe-rotonde"] = (
+        2,
+        [("buses-cars-archie-europe-rotonde_convnet_64_32_1_1.pb", None),
+         ("buses-cars-archie-europe-rotonde_convnet_64_32_1_1.pb", ("buses-cars-archie-europe-rotonde_raw_mse_lr_l2_delay10_resol50_ref-index369_num-blocks10.model", 360)),
+         ("buses-cars-archie-europe-rotonde_convnet_256_32_1_1.pb", None),
+         ("buses-cars-archie-europe-rotonde_convnet_256_32_1_1.pb", ("buses-cars-archie-europe-rotonde_raw_mse_lr_l2_delay10_resol50_ref-index369_num-blocks10.model", 360))]
+)
+YOLO_LABELS["coral-reef"] = (
+        0,
+        [("coral-reef_convnet_256_64_1_1.pb", None),
+         ("coral-reef_convnet_256_64_1_1.pb", ("coral-reef_raw_mse_lr_l2_delay10_resol100_ref-index508_num-blocks10.model", 510)),
+         ("coral-reef_convnet_128_64_1_1.pb", None),
+         ("coral-reef_convnet_128_64_1_1.pb", ("coral-reef_raw_mse_lr_l2_delay10_resol100_ref-index508_num-blocks10.model", 510))]
+)
 #YOLO_LABELS["coupa"] = (0, [("", ()), ("", ()), ("", ()), ("", ())])
 #YOLO_LABELS["huang"] = (0, [("", ()), ("", ()), ("", ()), ("", ())])
-YOLO_LABELS["elevator"] = (0, [("elevator_mnist_256_32.pb", None), ("elevator_mnist_256_32.pb", ("elevator_raw_mse_lr_l2_delay10_resol100_ref-index59_num-blocks10.model", 60)), ("elevator_mnist_64_16.pb", None), ("elevator_mnist_64_16.pb", ("elevator_raw_mse_lr_l2_delay10_resol100_ref-index59_num-blocks10.model", 60))])
+YOLO_LABELS["elevator"] = (
+        0,
+        [("gates-elevator_convnet_128_32_1_1.pb", None),
+         ("gates-elevator_convnet_128_32_1_1.pb", ("elevator_raw_mse_lr_l2_delay10_resol100_ref-index59_num-blocks10.model", 60)),
+         ("gates-elevator_convnet_256_32_1_1.pb", None),
+         ("gates-elevator_convnet_256_32_1_1.pb", ("elevator_raw_mse_lr_l2_delay10_resol100_ref-index59_num-blocks10.model", 60))]
+)
 #YOLO_LABELS["lady-in-the-corner"] = (0, [("", ()), ("", ()), ("", ()), ("", ())]) 
-YOLO_LABELS["live-zicht-binnenhaven"] = (2, [("live-zicht-binnenhaven_mnist_256_64.pb", None), ("live-zicht-binnenhaven_mnist_256_64.pb", ("live-zicht-binnenhaven_raw_mse_lr_l2_delay10_resol50_ref-index141_num-blocks10.model", 150)), ("live-zicht-binnenhaven_mnist_128_16.pb", None), ("live-zicht-binnenhaven_mnist_128_16.pb", ("live-zicht-binnenhaven_raw_mse_lr_l2_delay10_resol50_ref-index141_num-blocks10.model", 150))]) 
+YOLO_LABELS["live-zicht-binnenhaven"] = (
+        2,
+        [("live-zicht-binnenhaven_convnet_256_32_1_1.pb", None),
+         ("live-zicht-binnenhaven_convnet_256_32_1_1.pb", ("live-zicht-binnenhaven_raw_mse_lr_l2_delay10_resol50_ref-index141_num-blocks10.model", 150)),
+         ("live-zicht-binnenhaven_convnet_128_32_1_1.pb", None),
+         ("live-zicht-binnenhaven_convnet_128_32_1_1.pb", ("live-zicht-binnenhaven_raw_mse_lr_l2_delay10_resol50_ref-index141_num-blocks10.model", 150))]
+)
 YOLO_LABELS["shibuya-halloween"] = (2, [("shibuya-halloween_mnist_64_16.pb", None), ("shibuya-halloween_mnist_64_16.pb", ("shibuya-halloween_raw_mse_lr_l2_delay10_resol50_ref-index59_num-blocks10.model", 60)), ("shibuya-halloween_cifar10_128_1.pb", None), ("shibuya-halloween_cifar10_128_1.pb", ("shibuya-halloween_raw_mse_lr_l2_delay10_resol50_ref-index59_num-blocks10.model", 60))]) 
-YOLO_LABELS["taipei"] = (5, [("taipei_cifar10_256_1.pb", None), ("taipei_cifar10_256_1.pb", ("taipei_raw_mse_lr_l2_delay10_resol50_ref-index59_num-blocks10.model", 60)), ("taipei_mnist_32_64.pb", None), ("taipei_mnist_32_64.pb", ("taipei_raw_mse_lr_l2_delay10_resol50_ref-index59_num-blocks10.model", 60))]) 
+YOLO_LABELS["taipei"] = (
+        5,
+        [("taipei_convnet_64_32_1_1.pb", None),
+         ("taipei_convnet_64_32_1_1.pb", ("taipei_raw_mse_lr_l2_delay10_resol50_ref-index59_num-blocks10.model", 60)),
+         ("taipei_convnet_128_32_1_1.pb", None),
+         ("taipei_convnet_128_32_1_1.pb", ("taipei_raw_mse_lr_l2_delay10_resol50_ref-index59_num-blocks10.model", 60))]
+)
 
 NO_CACHING = False
 
@@ -75,11 +118,11 @@ TRAIN_LEN = 100000
 TEST_START_IDX = 250000
 TEST_LEN = 300000
 
-TF_DIRPREFIX = '/root/tensorflow-noscope'
-DATA_DIR_PREFIX = '/root/noscope-data'
-EXPERIMENTS_DIR_PREFIX = '/root/noscope-experiments'
+TF_DIRPREFIX = '/lfs/raiders3/1/ddkang/noscope/tensorflow-noscope/'
+DATA_DIR_PREFIX = '/root/bailis/ddkang/noscope/data/'
+EXPERIMENTS_DIR_PREFIX = '/root/bailis/ddkang/noscope/experiments/'
 VIDEO_DIR_PREFIX = os.path.join(DATA_DIR_PREFIX, 'videos')
-VIDEO_CACHE_PREFIX = '/dfs/ddkang/vid-cache'
+VIDEO_CACHE_PREFIX = '/root/infolab/ddkang/vid-cache/'
 TRUTH_DIR_PREFIX = os.path.join(DATA_DIR_PREFIX, 'csv')
 
 DD_MEAN_DIR_PREFIX = os.path.join(DATA_DIR_PREFIX, 'dd-means')

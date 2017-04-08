@@ -50,7 +50,7 @@ def main():
 
     # Generally regression requires more iterations to converge.
     # Or so sleep deprived DK thinks
-    nb_epoch = 15 + 15 * args.regression
+    nb_epoch = 5 + 5 * args.regression
     print 'Trying VGG-style nets....'
     # CIFAR10 based architectures
     noscope.Models.try_params(
@@ -58,7 +58,7 @@ def main():
             list(itertools.product(
                     *[[X_train.shape[1:]], [nb_classes],
                       [64, 128, 256], [32, 64], [1, 2],
-                      [0.2, 0.5, 1]])),
+                      [1]])),
             data,
             args.output_dir,
             args.base_name,

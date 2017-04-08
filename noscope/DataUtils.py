@@ -2,7 +2,7 @@ import ast
 import h5py
 import numpy as np
 import pandas as pd
-from keras.utils import np_utils
+import np_utils
 from itertools import tee
 
 import VideoUtils
@@ -10,56 +10,55 @@ import VideoUtils
 # NOTE WARNING USERS BEWARE
 # REGRESSION WILL NOT DO WHAT YOU EXPECT IT TO
 
-def pairwise(iterable):
-    "s -> (s0,s1), (s1,s2), (s2, s3), ..."
-    a, b = tee(iterable)
-    next(b, None)
-    return zip(a, b)
-
 def nth_elem(list, n):
     return np.array([list[i] for i in xrange(0, len(list), n)])
 
-def get_labels(csv_fname, limit=None, interval=1, start=0):
+'''def get_labels(csv_fname, limit=None, interval=1, start=0):
     # Save the header
     df = pd.read_csv(csv_fname, skiprows=range(1, start + 1), nrows=limit)
     labels = map(ast.literal_eval, df['labels'])
     if interval > 1:
         labels = nth_elem(labels, interval)
+    return labels'''
+# FIXME: start
+def get_labels(csv_fname, start, limit):
+    df = pd.read_csv(csv_fname)
+    groups = df.set_index('frame')
+    def f(i):
+        if i not in groups.index:
+            return []
+        try:
+            return groups.loc[i, :].itertuples()
+        except:
+            return [groups.loc[i, :]]
+    labels = map(f, range(limit))
     return labels
 
-def get_raw_counts(csv_fname, OBJECTS=['person'], limit=None, interval=1, start=0):
-    labels = get_labels(csv_fname, interval=interval, limit=limit, start=start)
-    counts = np.zeros( (len(labels), len(OBJECTS)), dtype='uint8' )
-    for i, label in enumerate(labels):
-        for j, obj in enumerate(OBJECTS):
-            counts[i, j] = sum(map(lambda x: 1 if x['object_name'] == obj else 0, label))
-    return counts
-
 # FIXME: efficiency
-def get_counts(csv_fname, OBJECTS=['person'], limit=None, interval=1, start=0):
-    labels = get_labels(csv_fname, interval=interval, limit=limit, start=start)
+def get_counts(csv_fname, OBJECTS=['person'], limit=None, start=0):
+    labels = get_labels(csv_fname, limit=limit, start=start)
     counts = np.zeros( (len(labels), len(OBJECTS)), dtype='float' )
     for i, label in enumerate(labels):
+        label = list(label)
         for j, obj in enumerate(OBJECTS):
             counts[i, j] = max([0] + \
-                    map(lambda x: x['confidence'] if x['object_name'] == obj else 0, label))
+                    map(lambda x: x.confidence if x.object_name == obj else 0, label))
     return counts
 
-def get_differences(csv_fname, OBJECT, limit=None, interval=1, delay=1):
+def get_differences(csv_fname, OBJECT, limit=None, delay=1):
     def sym_diff(first, second):
         first_objs = set(x['object_name'] for x in first if x['object_name'] == OBJECT)
         second_objs = set(x['object_name'] for x in second if x['object_name'] == OBJECT)
         return len(first_objs.symmetric_difference(second_objs)) > 0
 
-    labels = get_labels(csv_fname, limit=limit, interval=interval, start=delay)
+    labels = get_labels(csv_fname, limit=limit, start=delay)
     return np.array([1 if sym_diff(labels[i], labels[i-delay]) else 0 for i in xrange(delay, limit, interval)])
 
 # FIXME: efficiency
-def get_binary(csv_fname, OBJECTS=['person'], limit=None, interval=1, start=0, WINDOW=30):
+def get_binary(csv_fname, OBJECTS=['person'], limit=None, start=0, WINDOW=30):
     counts = get_counts(csv_fname,
                         OBJECTS=OBJECTS,
                         limit=limit,
-                        interval=interval,
                         start=start) > 0.1 # NOTE: BEWARE USER
     counts = np.where(counts == 0, 0, 1)
     smoothed_counts = np.convolve(np.ones(WINDOW), np.ravel(counts), mode='same') > WINDOW * 0.7
