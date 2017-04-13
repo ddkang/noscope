@@ -21,8 +21,9 @@ def nth_elem(list, n):
         labels = nth_elem(labels, interval)
     return labels'''
 # FIXME: start
-def get_labels(csv_fname, start, limit):
+def get_labels(csv_fname, start, limit, OBJECTS=['person']):
     df = pd.read_csv(csv_fname)
+    df = df[df['object_name'].isin(OBJECTS)]
     groups = df.set_index('frame')
     def f(i):
         if i not in groups.index:
@@ -36,7 +37,7 @@ def get_labels(csv_fname, start, limit):
 
 # FIXME: efficiency
 def get_counts(csv_fname, OBJECTS=['person'], limit=None, start=0):
-    labels = get_labels(csv_fname, limit=limit, start=start)
+    labels = get_labels(csv_fname, limit=limit, start=start, OBJECTS=OBJECTS)
     counts = np.zeros( (len(labels), len(OBJECTS)), dtype='float' )
     for i, label in enumerate(labels):
         label = list(label)
@@ -51,7 +52,7 @@ def get_differences(csv_fname, OBJECT, limit=None, delay=1):
         second_objs = set(x['object_name'] for x in second if x['object_name'] == OBJECT)
         return len(first_objs.symmetric_difference(second_objs)) > 0
 
-    labels = get_labels(csv_fname, limit=limit, start=delay)
+    labels = get_labels(csv_fname, limit=limit, start=delay, OBJECTS=OBJECTS)
     return np.array([1 if sym_diff(labels[i], labels[i-delay]) else 0 for i in xrange(delay, limit, interval)])
 
 # FIXME: efficiency
