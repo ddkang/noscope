@@ -7,6 +7,8 @@ import json
 import sys
 import os
 import timeit
+import collections
+import noscope
 
 DIRNAME = os.path.dirname(os.path.realpath(__file__))
 
@@ -25,9 +27,9 @@ def strip_comment_lines(lines):
     return lines
 
 def parse_yolo_csv(f, label, start, end):
-    file_lines = strip_comment_lines( f.read().strip().split('\n') )
-    
-    if( start != 0 or end != len(file_lines) ):
+    '''file_lines = strip_comment_lines( f.read().strip().split('\n') )
+
+    if (start != 0 or end != len(file_lines)):
         sys.stdout.write('WARNING: computing accuracy with respect to ground truth frames {} to {}\n'.format(start, end))
 
     file_lines = file_lines[start:end]
@@ -41,7 +43,7 @@ def parse_yolo_csv(f, label, start, end):
         try:
             frame_objects_str.append( (int(line.split(',')[0]), line.split('"')[1]) ) 
         except:
-            print line 
+            print line
             raise line
 
     frame_objects = map(lambda x: (x[0], eval(x[1])), frame_objects_str )
@@ -52,7 +54,6 @@ def parse_yolo_csv(f, label, start, end):
         best_obj = dict.copy(default_object)
         best_obj['frame_num'] = frame_num
 
-        
         for obj in objs:
             try:
                 if (obj['object_name'] == label and obj['confidence'] > best_confidence):
@@ -65,10 +66,23 @@ def parse_yolo_csv(f, label, start, end):
                 raise obj
 
         frame_objects_final.append(best_obj)
-    
     # print '\n'.join(map(str, frame_objects_final[1600:1630]))
-    return frame_objects_final
+    return frame_objects_final'''
     
+    nt = collections.namedtuple('Label', ['frame_num', 'confidence', 'object_name'])
+    def f(i, x):
+        x = list(x)
+        if len(x) == 0:
+            return nt(start + i, 0, label)
+        # For a given frame, labels are sorted in reverse order
+        return nt(start + i, x[0].confidence, label)
+    labels = noscope.DataUtils.get_labels(
+        '/lfs/raiders3/1/ddkang/noscope/py-R-FCN/standalone_test/completed/taipei.csv',
+        start=start, limit=end - start, OBJECTS=[label])
+    frame_objs = map(lambda i: f(i, labels[i]), range(len(labels)))
+
+    return frame_objs
+
 def parse_noscope_csv(f, label, start=TEST_START_IDX, end=TEST_END_IDX):
     lines = f.read().strip().split('\n')
     metadata = lines[0]
@@ -172,7 +186,8 @@ def smooth_indicator(indicator):
     return np.asarray( indicator_smooth )
 
 def window_yolo(frames):
-    true_indicator = np.asarray( map(lambda x: int(x['confidence'] > YOLO_CONFIDENCE), frames) )
+    true_indicator = np.asarray( map(lambda x: int(x.confidence > YOLO_CONFIDENCE), frames) )
+    # true_indicator = np.asarray( map(lambda x: int(x['confidence'] > YOLO_CONFIDENCE), frames) )
     
     # smooth and window the yolo labels
     return smooth_indicator(true_indicator)

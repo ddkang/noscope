@@ -32,8 +32,8 @@ def get_labels(csv_fname, start, limit, OBJECTS=['person']):
             return groups.loc[i, :].itertuples()
         except:
             return [groups.loc[i, :]]
-    labels = map(f, range(limit))
-    return labels
+    labels = map(f, range(limit + start))
+    return labels[start:]
 
 # FIXME: efficiency
 def get_counts(csv_fname, OBJECTS=['person'], limit=None, start=0):

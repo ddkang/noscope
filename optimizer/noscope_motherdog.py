@@ -278,7 +278,8 @@ summary_file.write('target_fn, target_fp, skip_dd, skip_cnn, dd, dd_thres, cnn, 
 summary_file.flush()
 
 label_name = LABELS[yolo_label_num]
-truth_csv = os.path.join(TRUTH_DIR_PREFIX, video_name+'.mp4.csv.commented')
+# truth_csv = os.path.join(TRUTH_DIR_PREFIX, video_name+'.mp4.csv.commented')
+truth_csv = os.path.join(TRUTH_DIR_PREFIX, video_name + '.csv')
 
 test_csv_filename =  "test_" + str(TEST_START_IDX) + "_" + str(TEST_START_IDX+TEST_LEN) + ".csv"
 
