@@ -111,18 +111,30 @@ def main():
     X_train, Y_train, X_test, Y_test = data
 
     nb_epoch = 1
-    noscope.Models.try_params(
+    runner = noscope.Models.BinaryClassificationModel()
+    runner.try_params(
             noscope.Models.generate_conv_net_base,
             list(itertools.product(
                     *[[X_train.shape[1:]], [nb_classes],
-                      [32, 64, 128, 256], [32], [1, 2, 3]])),
+                      # [1], [16, 32], [1, 2, 3, 4]])),
+                      [32, 64, 128], [16, 32], [1, 2, 3, 4]])),
+            data,
+            args.output_dir,
+            args.base_name,
+            'convnet')
+    '''noscope.Models.try_params(
+            noscope.Models.generate_conv_net_base,
+            list(itertools.product(
+                    *[[X_train.shape[1:]], [nb_classes],
+                      # [1], [16, 32], [1, 2, 3, 4]])),
+                      [32, 64, 128], [16, 32], [1, 2, 3, 4]])),
             data,
             args.output_dir,
             args.base_name,
             'convnet',
             objects[0],
             regression=False,
-            nb_epoch=nb_epoch)
+            nb_epoch=nb_epoch)'''
 
 if __name__ == '__main__':
     main()
