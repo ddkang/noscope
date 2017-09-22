@@ -194,14 +194,40 @@ class RegressionModel(NoScopeModel):
         return ['mean_squared_error']
 
     def evaluate_model(self, model, X_test, Y_test, batch_size=256):
+        def iou(box1, box2):
+            def to_cent(box):
+                xmin, ymin, xmax, ymax = box
+                xcent = (xmax + xmin) / 2
+                ycent = (ymax + ymin) / 2
+                return (xcent, ycent, xmax - xcent, ymax - ycent)
+            box1 = to_cent(box1)
+            box2 = to_cent(box2)
+            if box1[0] + box1[2] <= box2[0] - box2[2] or \
+                    box2[0] + box2[2] <= box1[0] - box1[2] or \
+                    box1[1] + box1[3] <= box2[1] - box2[3] or \
+                    box2[1] + box2[3] <= box1[1] - box1[3]:
+                return 0.0
+            else:
+                xA = min(box1[0] + box1[2], box2[0] + box2[2])
+                yA = min(box1[1] + box1[3], box2[1] + box2[3])
+                xB = max(box1[0] - box1[2], box2[0] - box2[2])
+                yB = max(box1[1] - box1[3], box2[1] - box2[3])
+                interArea = (xA - xB) * (yA - yB)
+                box1Area = (2 * box1[2]) * (2 * box1[3])
+                box2Area = (2 * box2[2]) * (2 * box2[3])
+                return max(interArea / float(box1Area + box2Area - interArea), 0.0)
         begin = time.time()
         raw_predictions = model.predict(X_test, batch_size=batch_size, verbose=0)
         end = time.time()
         mse = sklearn.metrics.mean_squared_error(Y_test, raw_predictions)
+        iou = [iou(x, y) for x, y in zip(raw_predictions, Y_test)]
+        iou = np.array(iou)
 
         metrics = {}
+        metrics['iou'] = np.mean(iou)
         metrics['mse'] = mse
         metrics['test_time'] = end - begin
+        return metrics
 
 # FIXME: untested
 class MulticlassClassificationModel(NoScopeModel):
