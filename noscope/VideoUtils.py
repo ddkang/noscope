@@ -38,9 +38,16 @@ def VideoHistIterator(video_fname, scale=None, start=0):
         hist = ColorHistogram.compute_histogram(frame)
         yield frame_ind, frame, hist
 
+# FIXME: scale is fucking bad
 def get_all_frames(num_frames, video_fname, scale=None, interval=1, start=0, dtype='float32'):
     if video_fname[-4:] == '.bin':
-        RESOL = (50, 50) # FIXME
+        if scale is not None:
+            try:
+                len(scale)
+                assert len(scale) == 2
+                RESOL = scale
+            except:
+                RESOL = (50, 50)
         FRAME_SIZE = RESOL[0] * RESOL[0] * 3
         f = open(video_fname, 'rb')
         f.seek(start * FRAME_SIZE)

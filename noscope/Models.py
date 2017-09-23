@@ -17,8 +17,7 @@ import np_utils
 def generate_conv_net_base(
         input_shape, nb_classes,
         nb_dense=128, nb_filters=32, nb_layers=1, lr_mult=1,
-        kernel_size=(3, 3), stride=(1, 1),
-        regression=False):
+        kernel_size=(3, 3), stride=(1, 1)):
     assert nb_layers >= 1
     model = Sequential()
     model.add(Conv2D(nb_filters, kernel_size,
@@ -41,18 +40,18 @@ def generate_conv_net_base(
     model.add(Dense(nb_dense, activation='relu'))
     model.add(Dropout(0.5))
     model.add(Dense(nb_classes))
-    if not regression:
-        model.add(Activation('softmax'))
-
     return model
 
 def generate_conv_net(input_shape, nb_classes,
                       nb_dense=128, nb_filters=32, nb_layers=1, lr_mult=1,
                       regression=False):
-    return generate_conv_net_base(
+    model = generate_conv_net_base(
             input_shape, nb_classes,
-            nb_dense=nb_dense, nb_filters=nb_filters, nb_layers=nb_layers, lr_mult=lr_mult,
-            regression=regression)
+            nb_dense=nb_dense, nb_filters=nb_filters, nb_layers=nb_layers,
+            lr_mult=lr_mult)
+    if not regression:
+        model.add(Activation('softmax'))
+    return model
 
 
 class NoScopeModel(object):

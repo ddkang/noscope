@@ -100,7 +100,7 @@ def main():
 
     nb_epoch = 1
     runner = noscope.Models.RegressionModel()
-    gen = functools.partial(noscope.Models.generate_conv_net_base, regression=True)
+    gen = functools.partial(noscope.Models.generate_conv_net, regression=True)
     runner.try_params(
             gen,
             list(itertools.product(
