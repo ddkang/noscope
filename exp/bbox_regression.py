@@ -35,17 +35,6 @@ def to_test_train(avg_fname, all_frames, bbox_dict, train_ratio=0.8):
     return X_train, X_test, Y_train, Y_test
 
 
-def get_data(csv_fname, video_fname, avg_fname,
-             num_frames=None, start_frame=0,
-             OBJECTS=['person'], resol=(50, 50),
-             center=True, dtype='float32', train_ratio=0.6):
-
-    print 'shape of image: ' + str(all_frames[0].shape)
-    print 'number of classes: %d' % (nb_classes)
-
-    data = (X_train, Y_train, X_test, Y_test)
-    return data, nb_classes
-
 def get_bbox(csv_fname, limit=None, start=0, labels=['person']):
     df = pd.read_csv(csv_fname)
     df = df[df['frame'] >= start]
