@@ -8,18 +8,17 @@
 #include "opencv2/videoio.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 
-constexpr size_t kResol_ = 50;
-constexpr size_t kFrameSize_ = kResol_ * kResol_ * 3;
-
 int main(int argc, char** argv) {
-  if (argc != 4) {
-    std::cerr << "Usage: " << argv[0] << " FNAME NUM_FRAMES START_FRAME\n";
+  if (argc != 5) {
+    std::cerr << "Usage: " << argv[0] << " FNAME NUM_FRAMES START_FRAME RESOL\n";
     return 0;
   }
 
   const std::string fname(argv[1]);
   const size_t kNbFrames_ = std::stoi(argv[2]);
   const size_t kStartFrame_ = std::stoi(argv[3]);
+  const size_t kResol_ = std::stoi(argv[4]);
+  const size_t kFrameSize_ = kResol_ * kResol_ * 3;
 
   std::cout << "Running on:\n";
   std::cout << fname << "\n";
