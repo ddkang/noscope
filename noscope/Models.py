@@ -81,7 +81,7 @@ class NoScopeModel(object):
         begin_train = time.time()
         model.fit(X_train, Y_train,
                   batch_size=batch_size,
-                  nb_epoch=nb_epoch,
+                  epochs=nb_epoch,
                   shuffle=True,
                   class_weight='auto',
                   callbacks=self.get_callbacks(temp_fname))
