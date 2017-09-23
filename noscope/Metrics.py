@@ -13,7 +13,23 @@ def classification_metrics(proba, Y_test):
     num_penalties, thresh_low, thresh_high = \
         StatsUtils.yolo_oracle(Y_test[:, 1], proba[:, 1])
     windowed_acc, windowed_supp = StatsUtils.windowed_accuracy(predicted_labels, Y_test)
-    confusion = sklearn.metrics.confusion_matrix(true_labels, predicted_labels)
+
+    '''confusion = sklearn.metrics.confusion_matrix(true_labels, predicted_labels)
+    # Minor smoothing to prevent division by 0 errors
+    TN = float(confusion[0][0]) + 1
+    FN = float(confusion[1][0]) + 1
+    TP = float(confusion[1][1]) + 1
+    FP = float(confusion[0][1]) + 1
+    metrics = {'recall': TP / (TP + FN),
+               'specificity': TN / (FP + TN),
+               'precision': TP / (TP + FP),
+               'npv':  TN / (TN + FN),
+               'fpr': FP / (FP + TN),
+               'fdr': FP / (FP + TP),
+               'fnr': FN / (FN + TP),
+               'accuracy': (TP + TN) / (TP + FP + TN + FN),
+               'f1': (2 * TP) / (2 * TP + FP + FN),
+               'test_time': test_time}'''
 
     metrics = {'precision': precision,
                'recall': recall,

@@ -171,22 +171,6 @@ class BinaryClassificationModel(NoScopeModel):
         end = time.time()
         test_time = end - begin
 
-        '''confusion = sklearn.metrics.confusion_matrix(true_labels, predicted_labels)
-        # Minor smoothing to prevent division by 0 errors
-        TN = float(confusion[0][0]) + 1
-        FN = float(confusion[1][0]) + 1
-        TP = float(confusion[1][1]) + 1
-        FP = float(confusion[0][1]) + 1
-        metrics = {'recall': TP / (TP + FN),
-                   'specificity': TN / (FP + TN),
-                   'precision': TP / (TP + FP),
-                   'npv':  TN / (TN + FN),
-                   'fpr': FP / (FP + TN),
-                   'fdr': FP / (FP + TP),
-                   'fnr': FN / (FN + TP),
-                   'accuracy': (TP + TN) / (TP + FP + TN + FN),
-                   'f1': (2 * TP) / (2 * TP + FP + FN),
-                   'test_time': test_time}'''
         metrics = Metrics.classification_metrics(proba, Y_test)
         metrics['test_time'] = test_time
         return metrics
@@ -229,7 +213,7 @@ class DetectionModel(NoScopeModel):
             yp2 = y_pred[:, 2:]
             # FIXME: lambda?
             return keras.losses.categorical_crossentropy(yt1, yp1) + \
-                y_true[:, 1] * keras.losses.mse(yt2, yp2)
+                y_true[:, 1] * keras.losses.mse(yt2, yp2) / K.mean(y_true[:, 1])
         return det_loss
 
     def get_metrics(self):
@@ -240,7 +224,7 @@ class DetectionModel(NoScopeModel):
         def box_mse(y_true, y_pred):
             yt = y_true[:, 2:]
             yp = y_pred[:, 2:] * K.expand_dims(y_true[:, 1], axis=1)
-            return keras.metrics.mse(yt, yp)
+            return keras.metrics.mse(yt, yp) / K.mean(y_true[:, 1])
         def box_iou(y_true, y_pred):
             yt = y_true[:, 2:]
             yp = y_pred[:, 2:]
