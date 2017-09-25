@@ -54,7 +54,7 @@ def generate_conv_net_base(
 # FIXME: detection is single bbox only
 PredType = enum.Enum('PredType', 'BINARY REGRESSION DETECTION')
 from keras import backend as K
-def detection_act(t, relu=False):
+def detection_act(t, relu=True):
     t1 = keras.activations.softmax(t[:, 0:2])
     t2 = t[:, 2:]
     if relu:
@@ -154,7 +154,7 @@ class NoScopeModel(object):
 class BinaryClassificationModel(NoScopeModel):
     def __init__(self, **kwargs):
         super(BinaryClassificationModel, self).__init__(**kwargs)
-        self.pred_type = Predtype.BINARY
+        self.pred_type = PredType.BINARY
 
     def get_loss(self):
         return 'categorical_crossentropy'

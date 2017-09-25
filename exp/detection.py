@@ -46,9 +46,18 @@ def get_bbox(csv_fname, limit=None, start=0, labels=['person']):
     for row in df.itertuples():
         if row.frame not in d or d[row.frame].confidence < row.confidence:
             d[row.frame] = row
+    norm = (0, 0, 0, 0)
     for frame in d:
         row = d[frame]
-        d[frame] = (0, 1, row.xmin, row.ymin, row.xmax, row.ymax)
+        xmin, ymin, xmax, ymax = max(0, row.xmin), max(0, row.ymin), row.xmax, row.ymax
+        xcent = (xmax + xmin) / 2
+        ycent = (ymax + ymin) / 2
+        # d[frame] = (0, 1, max(0, row.xmin), max(0, row.ymin), row.xmax, row.ymax)
+        d[frame] = (0, 1, xcent, ycent, xmax - xcent, ymax - ycent)
+        norm = map(lambda i: max(norm[i], d[frame][i + 2]), range(len(norm)))
+    for frame in d:
+        row = d[frame][2:]
+        d[frame] = [0, 1] + map(lambda i: row[i] / norm[i], range(len(norm)))
     for frame in xrange(limit):
         if frame not in d:
             d[frame] = (1, 0, 0, 0, 0, 0)
@@ -109,7 +118,7 @@ def main():
             list(itertools.product(
                     *[[X_train.shape[1:]], [6],
                       # [1], [16, 32], [1, 2, 3, 4]])),
-                      [32, 64, 128], [16, 32], [1, 2, 3, 4]])),
+                      [64, 128], [16, 32], [2, 3, 4]])),
             data,
             args.output_dir,
             args.base_name,

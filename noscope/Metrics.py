@@ -47,8 +47,8 @@ def box_iou(box1, box2):
         xcent = (xmax + xmin) / 2
         ycent = (ymax + ymin) / 2
         return (xcent, ycent, xmax - xcent, ymax - ycent)
-    box1 = to_cent(box1)
-    box2 = to_cent(box2)
+    # box1 = to_cent(box1)
+    # box2 = to_cent(box2)
     if box1[0] + box1[2] <= box2[0] - box2[2] or \
             box2[0] + box2[2] <= box1[0] - box1[2] or \
             box1[1] + box1[3] <= box2[1] - box2[3] or \
