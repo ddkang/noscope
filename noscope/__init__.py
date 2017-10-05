@@ -5,6 +5,7 @@ from DataUtils import *
 from StatsUtils import *
 from Models import *
 
+from Detection import *
 from Metrics import *
 from Learner import *
 

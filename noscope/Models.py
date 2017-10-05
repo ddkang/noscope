@@ -6,6 +6,7 @@ import os
 import tempfile
 import StatsUtils
 import DataUtils
+import Detection
 import Metrics
 import numpy as np
 import keras
@@ -53,15 +54,6 @@ def generate_conv_net_base(
 
 # FIXME: detection is single bbox only
 PredType = enum.Enum('PredType', 'BINARY REGRESSION DETECTION')
-from keras import backend as K
-def detection_act(t, activation='sigmoid'):
-    t1 = keras.activations.softmax(t[:, 0:2])
-    t2 = t[:, 2:]
-    if activation == 'relu':
-        t2 = keras.activations.relu(t2)
-    elif activation == 'sigmoid':
-        t2 = keras.activations.sigmoid(t2)
-    return K.concatenate([t1, t2], axis=-1)
 
 def generate_conv_net(input_shape, nb_classes,
                       nb_dense=128, nb_filters=32, nb_layers=1, lr_mult=1,
@@ -208,30 +200,10 @@ class DetectionModel(NoScopeModel):
         self.pred_type = PredType.DETECTION
 
     def get_loss(self):
-        def det_loss(y_true, y_pred):
-            yt1 = y_true[:, 0:2]
-            yp1 = y_pred[:, 0:2]
-            yt2 = y_true[:, 2:]
-            yp2 = y_pred[:, 2:]
-            # FIXME: lambda?
-            return keras.losses.categorical_crossentropy(yt1, yp1) + \
-                y_true[:, 1] * keras.losses.mse(yt2, yp2) / K.mean(y_true[:, 1])
-        return det_loss
+        return Detection.det_loss
 
     def get_metrics(self):
-        def classification_metric(y_true, y_pred):
-            yt = y_true[:, 0:2]
-            yp = y_pred[:, 0:2]
-            return keras.metrics.categorical_accuracy(yt, yp)
-        def box_mse(y_true, y_pred):
-            yt = y_true[:, 2:]
-            yp = y_pred[:, 2:] * K.expand_dims(y_true[:, 1], axis=1)
-            return keras.metrics.mse(yt, yp) / K.mean(y_true[:, 1])
-        def box_iou(y_true, y_pred):
-            yt = y_true[:, 2:]
-            yp = y_pred[:, 2:]
-            return np.mean(map(lambda x, y: Metrics.box_iou(x, y), zip(yt, yp)))
-        return [classification_metric, box_mse]#, box_iou]
+        return [Detection.classification_metric, Detection.box_mse]#, box_iou]
 
     def evaluate_model(self, model, X_test, Y_test, batch_size=256):
         begin = time.time()
