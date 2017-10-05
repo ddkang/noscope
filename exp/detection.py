@@ -36,7 +36,7 @@ def to_test_train(avg_fname, all_frames, bbox_dict, train_ratio=0.8):
     return X_train, X_test, Y_train, Y_test
 
 
-def get_bbox(csv_fname, limit=None, start=0, labels=['person']):
+def get_bbox(csv_fname, base_name, limit=None, start=0, labels=['person']):
     df = pd.read_csv(csv_fname)
     df = df[df['frame'] >= start]
     df = df[df['frame'] < start + limit]
@@ -55,20 +55,22 @@ def get_bbox(csv_fname, limit=None, start=0, labels=['person']):
         # d[frame] = (0, 1, max(0, row.xmin), max(0, row.ymin), row.xmax, row.ymax)
         d[frame] = (0, 1, xcent, ycent, xmax - xcent, ymax - ycent)
         norm = map(lambda i: max(norm[i], d[frame][i + 2]), range(len(norm)))
+    with open(base_name + '-norm.txt', 'w') as f:
+        f.write(str(norm))
     for frame in d:
         row = d[frame][2:]
-        d[frame] = [0, 1] + map(lambda i: row[i] / norm[i], range(len(norm)))
+        d[frame] = tuple([0, 1] + map(lambda i: row[i] / norm[i], range(len(norm))))
     for frame in xrange(limit):
         if frame not in d:
             d[frame] = (1, 0, 0, 0, 0, 0)
     return d
 
-def get_bbox_data(csv_fname, video_fname, avg_fname,
+def get_bbox_data(csv_fname, video_fname, avg_fname, base_name,
                   num_frames=None, start_frame=0,
                   OBJECTS=['person'], resol=(50, 50),
                   center=True, dtype='float32'):
     print '\tParsing %s, extracting %s' % (csv_fname, str(OBJECTS))
-    bbox_dict = get_bbox(csv_fname, limit=num_frames, labels=OBJECTS, start=start_frame)
+    bbox_dict = get_bbox(csv_fname, base_name, limit=num_frames, labels=OBJECTS, start=start_frame)
     print '\tRetrieving all frames from %s' % video_fname
     all_frames = noscope.VideoUtils.get_all_frames(
             num_frames, video_fname, scale=resol, start=start_frame)
@@ -104,9 +106,8 @@ def main():
 
     print 'Preparing data....'
     data = get_bbox_data(
-            args.csv_in, args.video_in, args.avg_fname,
-            num_frames=args.num_frames,
-            start_frame=args.start_frame,
+            args.csv_in, args.video_in, args.avg_fname, args.base_name,
+            num_frames=args.num_frames, start_frame=args.start_frame,
             OBJECTS=objects,
             resol=(50, 50))
     X_train, Y_train, X_test, Y_test = data

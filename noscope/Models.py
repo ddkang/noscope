@@ -54,11 +54,13 @@ def generate_conv_net_base(
 # FIXME: detection is single bbox only
 PredType = enum.Enum('PredType', 'BINARY REGRESSION DETECTION')
 from keras import backend as K
-def detection_act(t, relu=True):
+def detection_act(t, activation='sigmoid'):
     t1 = keras.activations.softmax(t[:, 0:2])
     t2 = t[:, 2:]
-    if relu:
+    if activation == 'relu':
         t2 = keras.activations.relu(t2)
+    elif activation == 'sigmoid':
+        t2 = keras.activations.sigmoid(t2)
     return K.concatenate([t1, t2], axis=-1)
 
 def generate_conv_net(input_shape, nb_classes,
