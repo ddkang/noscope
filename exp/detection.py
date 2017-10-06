@@ -6,82 +6,95 @@ import pandas as pd
 import noscope
 from noscope import np_utils
 
-def to_test_train(avg_fname, all_frames, bbox_dict, train_ratio=0.8):
-    print all_frames.shape
+# The data is too big to actually hold,
+# so the methods will return the arrays directly
+class DataLoader(object):
+    def __init__(self, start_frame, nb_frames, resol, labels, output_base):
+        self.start_frame = start_frame
+        self.nb_frames = nb_frames
+        self.resol = resol
+        self.labels = labels
+        # Output base for how where to store metadata files
+        self.output_base = output_base
 
-    frames = sorted(bbox_dict.keys())
+    def load_labels(self, csv_fname):
+        df = pd.read_csv(csv_fname)
+        df = df[df['frame'] >= self.start_frame]
+        df = df[df['frame'] < self.start_frame + self.nb_frames]
+        df['frame'] -= self.start_frame
+        df = df[df['object_name'].isin(self.labels)]
+        return df
 
-    X = all_frames
-    mean = np.mean(X, axis=0)
-    np.save(avg_fname, mean)
+    def load_video(self, video_fname):
+        # FIXME: have it dispatch based on video_fname
+        return noscope.VideoUtils.get_all_frames(
+                self.nb_frames, video_fname,
+                start=self.start_frame, scale=self.resol)
 
-    X = X[frames]
-    Y = np.array(map(lambda x: bbox_dict[x], frames))
+    def split(self, X, Y, keep_fraction=0.25, train_ratio=0.8):
+        mean = np.mean(X, axis=0)
+        np.save(self.output_base + '.npy', mean)
 
-    p = np.random.permutation(len(X))
-    p = p[0 : len(p) // 4]
-    X, Y = X[p], Y[p]
-    X -= mean
+        p = np.random.permutation(len(X))
+        p = p[0 : int(len(p) * keep_fraction)]
+        X, Y = X[p], Y[p]
+        X -= mean
 
-    def split(arr):
-        # 250 -> 100, 50, 100
-        ind = int(len(arr) * train_ratio)
-        if ind > 50000:
-            ind = len(arr) - 50000
-        return arr[:ind], arr[ind:]
+        def split(arr):
+            # 250 -> 100, 50, 100
+            ind = int(len(arr) * train_ratio)
+            if ind > 50000:
+                ind = len(arr) - 50000
+            return arr[:ind], arr[ind:]
 
-    X_train, X_test = split(X)
-    Y_train, Y_test = split(Y)
+        X_train, X_test = split(X)
+        Y_train, Y_test = split(Y)
 
-    return X_train, X_test, Y_train, Y_test
+        # return X_train, X_test, Y_train, Y_test
+        return X_train, Y_train, X_test, Y_test
+
+    def get_evaluation_data(self, csv_fname, video_fname):
+        print '\tParsing %s, extracting %s' % (csv_fname, str(self.labels))
+        X = self.load_video(video_fname)
+        print '\tRetrieving all frames from %s' % video_fname
+        Y = self.load_labels(csv_fname)
+        return X, Y
+
+    def get_train_data(self, csv_fname, video_fname, keep_fraction=0.25, train_ratio=0.8):
+        X, Y = self.get_evaluation_data(csv_fname, video_fname)
+        print '\tSplitting data into training and test sets'
+        return self.split(X, Y, keep_fraction, train_ratio)
 
 
-def get_bbox(csv_fname, base_name, limit=None, start=0, labels=['person']):
-    df = pd.read_csv(csv_fname)
-    df = df[df['frame'] >= start]
-    df = df[df['frame'] < start + limit]
-    df['frame'] -= start
-    df = df[df['object_name'].isin(labels)]
-    d = {}
-    for row in df.itertuples():
-        if row.frame not in d or d[row.frame].confidence < row.confidence:
-            d[row.frame] = row
-    norm = (0, 0, 0, 0)
-    for frame in d:
-        row = d[frame]
-        xmin, ymin, xmax, ymax = max(0, row.xmin), max(0, row.ymin), row.xmax, row.ymax
-        xcent = (xmax + xmin) / 2
-        ycent = (ymax + ymin) / 2
-        # d[frame] = (0, 1, max(0, row.xmin), max(0, row.ymin), row.xmax, row.ymax)
-        d[frame] = (0, 1, xcent, ycent, xmax - xcent, ymax - ycent)
-        norm = map(lambda i: max(norm[i], d[frame][i + 2]), range(len(norm)))
-    with open(base_name + '-norm.txt', 'w') as f:
-        f.write(str(norm))
-    for frame in d:
-        row = d[frame][2:]
-        d[frame] = tuple([0, 1] + map(lambda i: row[i] / norm[i], range(len(norm))))
-    for frame in xrange(limit):
-        if frame not in d:
-            d[frame] = (1, 0, 0, 0, 0, 0)
-    return d
+class DetectionLoader(DataLoader):
+    def load_labels(self, csv_fname):
+        df = super(DetectionLoader, self).load_labels(csv_fname)
+        d = {}
+        for row in df.itertuples():
+            if row.frame not in d or d[row.frame].confidence < row.confidence:
+                d[row.frame] = row
+        norm = (0, 0, 0, 0)
+        for frame in d:
+            row = d[frame]
+            xmin, ymin, xmax, ymax = max(0, row.xmin), max(0, row.ymin), row.xmax, row.ymax
+            xcent = (xmax + xmin) / 2
+            ycent = (ymax + ymin) / 2
+            # d[frame] = (0, 1, max(0, row.xmin), max(0, row.ymin), row.xmax, row.ymax)
+            d[frame] = (0, 1, xcent, ycent, xmax - xcent, ymax - ycent)
+            norm = map(lambda i: max(norm[i], d[frame][i + 2]), range(len(norm)))
+        with open(self.output_base + '-norm.txt', 'w') as f:
+            f.write(str(norm))
+        for frame in d:
+            row = d[frame][2:]
+            d[frame] = tuple([0, 1] + map(lambda i: row[i] / norm[i], range(len(norm))))
+        for frame in xrange(self.nb_frames):
+            if frame not in d:
+                d[frame] = (1, 0, 0, 0, 0, 0)
 
-def get_bbox_data(csv_fname, video_fname, avg_fname, base_name,
-                  num_frames=None, start_frame=0,
-                  OBJECTS=['person'], resol=(50, 50),
-                  center=True, dtype='float32'):
-    print '\tParsing %s, extracting %s' % (csv_fname, str(OBJECTS))
-    bbox_dict = get_bbox(csv_fname, base_name, limit=num_frames, labels=OBJECTS, start=start_frame)
-    print '\tRetrieving all frames from %s' % video_fname
-    all_frames = noscope.VideoUtils.get_all_frames(
-            num_frames, video_fname, scale=resol, start=start_frame)
-    print '\tSplitting data into training and test sets'
-    X_train, X_test, Y_train, Y_test = to_test_train(avg_fname, all_frames, bbox_dict)
-
-    print 'train ex: %d, test ex: %d' % (len(X_train), len(X_test))
-    print 'shape of image: ' + str(X_train[0].shape)
-
-    data = (X_train, Y_train, X_test, Y_test)
-    return data
+                Y = np.zeros((self.nb_frames, 6)) # FIXME: 6
+        for i in range(self.nb_frames):
+            Y[i] = d[i]
+        return Y
 
 def main():
     parser = argparse.ArgumentParser()
@@ -105,11 +118,9 @@ def main():
     assert len(objects) == 1
 
     print 'Preparing data....'
-    data = get_bbox_data(
-            args.csv_in, args.video_in, args.avg_fname, args.base_name,
-            num_frames=args.num_frames, start_frame=args.start_frame,
-            OBJECTS=objects,
-            resol=(50, 50))
+    loader = DetectionLoader(args.start_frame, args.num_frames, (50, 50),
+                             objects, args.base_name)
+    data = loader.get_train_data(args.csv_in, args.video_in)
     X_train, Y_train, X_test, Y_test = data
 
     nb_epoch = 1
