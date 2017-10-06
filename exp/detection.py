@@ -55,9 +55,9 @@ class DataLoader(object):
 
     def get_evaluation_data(self, csv_fname, video_fname):
         print '\tParsing %s, extracting %s' % (csv_fname, str(self.labels))
-        X = self.load_video(video_fname)
-        print '\tRetrieving all frames from %s' % video_fname
         Y = self.load_labels(csv_fname)
+        print '\tRetrieving all frames from %s' % video_fname
+        X = self.load_video(video_fname)
         return X, Y
 
     def get_train_data(self, csv_fname, video_fname, keep_fraction=0.25, train_ratio=0.8):
@@ -91,7 +91,7 @@ class DetectionLoader(DataLoader):
             if frame not in d:
                 d[frame] = (1, 0, 0, 0, 0, 0)
 
-                Y = np.zeros((self.nb_frames, 6)) # FIXME: 6
+        Y = np.zeros((self.nb_frames, 6)) # FIXME: 6
         for i in range(self.nb_frames):
             Y[i] = d[i]
         return Y
